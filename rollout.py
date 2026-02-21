@@ -26,19 +26,19 @@ actuator = BatchedActuator(
 )
 
 system = BatchedJoint(mass, length, batch_size, device, dtype, actuator=actuator)
-policy = JointPolicy(batch_size)
+policy = JointPolicy(batch_size=batch_size, num_actuators=1)
 
 state_trace = torch.zeros(batch_size, sim_length + 1, 2, device=device, dtype=dtype)
-tau_trace = torch.zeros(batch_size, sim_length + 1, device=device, dtype=dtype)
+tau_trace = torch.zeros(batch_size, sim_length + 1, 1, device=device, dtype=dtype)
 
 state_trace[:, 0, :] = system.state.clone()
-tau_trace[:, 0] = torch.zeros(batch_size, device=device, dtype=dtype)
+tau_trace[:, 0, :] = torch.zeros(batch_size, 1, device=device, dtype=dtype)
 
 for i in range(sim_length):
     torque_command = policy(state_trace[:, i, :], target_state)
     eff_applied_torque = system.step_dynamics(torque_command)
     state_trace[:, i + 1, :] = system.state.clone()
-    tau_trace[:, i + 1] = eff_applied_torque.clone()
+    tau_trace[:, i + 1, :] = eff_applied_torque.clone()
 
 state_trace = state_trace.detach().cpu()
 tau_trace = tau_trace.detach().cpu()
