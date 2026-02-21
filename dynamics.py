@@ -76,4 +76,7 @@ class BatchedJoint:
         return applied_torque
 
     def reset(self) -> None:
-        self.state = torch.zeros(self.batch_size, 2, device=self.device, dtype=self.dtype)
+        theta = torch.rand((self.batch_size, 1), device=self.device, dtype=self.dtype) * 2 * torch.pi
+        theta_dot = torch.zeros_like(theta)
+
+        self.state = torch.concat([theta, theta_dot], dim=1)
