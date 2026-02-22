@@ -29,9 +29,9 @@ def step_dynamics(
         raise ValueError("Expected matching batch dimension between state and applied_torque")
 
     theta_dot_dot = get_theta_dot_dot(state[:, 0:1], applied_torque, mass, length)
-    state[:, 1:2] += theta_dot_dot * TIMESTEP_SIZE
-    state[:, 0:1] += state[:, 1:2] * TIMESTEP_SIZE
-    return state
+    new_theta_dot = state[:, 1:2] + theta_dot_dot * TIMESTEP_SIZE
+    new_theta = state[:, 0:1] + new_theta_dot * TIMESTEP_SIZE
+    return torch.cat([new_theta, new_theta_dot], dim=1)
 
 class BatchedJoint:
     mass: float
